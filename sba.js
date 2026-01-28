@@ -77,27 +77,39 @@ const LearnerSubmissions = [
 ];
 
 function getLearnerData(course, ag, submissions) {
+    // TEST: verify function is running
+    /*
+    console.log("Function started");
+     */
     try {
-        // ✅ validation FIRST
         if (ag.course_id !== course.id) {
             throw new Error("AssignmentGroup does not belong to this course");
         }
 
         const learnerMap = {};
 
-        // Step 1: Group submissions by learner
+        // Group submissions by learner
         for (const sub of submissions) {
             if (!learnerMap[sub.learner_id]) {
                 learnerMap[sub.learner_id] = [];
             }
             learnerMap[sub.learner_id].push(sub);
         }
+        // TEST: Grouped submissions by learner
+        /*
+        console.log("Grouped submissions by learner:", learnerMap);
+         */
+
 
         const now = new Date();
         const results = [];
 
-        // Step 2: Loop through learners
+        // Loop through learners
         for (const learnerId in learnerMap) {
+            // TEST: verify learner loop starts
+            /*
+            console.log(`\nProcessing learner ${learnerId}`);
+             */
             const learnerSubs = learnerMap[learnerId];
             const learnerResults = {};
             let totalScore = 0;
@@ -107,19 +119,39 @@ function getLearnerData(course, ag, submissions) {
                 const assignment = ag.assignments.find(
                     a => a.id === submission.assignment_id
                 );
+                // TEST: verify assignment lookup
+                /*
+                console.log("Assignment found:", assignment?.name);
                 if (!assignment) continue;
 
-                // ✅ protect against divide by zero
+                 */
+
+                // confirm no divide by zero
                 if (assignment.points_possible === 0) {
                     throw new Error(`Assignment ${assignment.id} has 0 possible points`);
                 }
 
                 const dueDate = new Date(assignment.due_at);
-                if (dueDate > now) continue;
+                // TEST: Verify Due-Dates
+                /*
+                console.log(
+                    `Assignment ${assignment.id} due ${dueDate.toDateString()}, now is ${now.toDateString()}`
+                );
+                 */
+                // This is why learner 1 only has 2 grades in terminal
+                // Translation: Do NOT include assignments that are not due yet
+                if (dueDate > now) {
+                   /* console.log(
+                        `Skipping assignment ${assignment.id} — not due yet`
+                    );
+
+                    */
+                    continue;
+                }
 
                 let score = submission.submission.score;
 
-                // ✅ basic type validation
+                // type validation
                 if (typeof score !== "number") {
                     throw new Error(`Invalid score for learner ${learnerId}`);
                 }
@@ -128,6 +160,13 @@ function getLearnerData(course, ag, submissions) {
                 if (submittedAt > dueDate) {
                     score -= assignment.points_possible * 0.1;
                 }
+                // TEST: verify late penalty
+                /*
+                console.log(
+                    `Score after late check: ${score} (submitted ${submittedAt.toDateString()})`
+                );
+                 */
+
 
                 if (score < 0) score = 0;
 
@@ -140,6 +179,17 @@ function getLearnerData(course, ag, submissions) {
                 totalScore += score;
                 totalPoints += assignment.points_possible;
             }
+            // To define avg
+            /*
+            const avg = totalScore/ totalPoints
+            // TEST: verify final learner object
+
+            console.log("Final learner result:", {
+                id: Number(learnerId),
+                avg: Number(avg.toFixed(3)),
+                ...learnerResults
+            });
+             */
 
             results.push({
                 id: Number(learnerId),
@@ -154,13 +204,14 @@ function getLearnerData(course, ag, submissions) {
         console.error("Error:", error.message);
         return [];
     }
+
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
 console.log(result);
 
-// TEST: Invalid course_id (should trigger error handling)
+// TEST: Invalid course_id (triggers error handling)
 // const badAssignmentGroup = { ...AssignmentGroup, course_id: 999 };
 
 // console.log(
