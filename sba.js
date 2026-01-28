@@ -171,6 +171,7 @@ function getLearnerData(course, ag, submissions) {
                 if (score < 0) score = 0;
 
                 const percentage = Number(
+                    // Keeps 3 decimal places rather than long, repeating decimals
                     (score / assignment.points_possible).toFixed(3)
                 );
 
