@@ -1,0 +1,9 @@
+This project processes course, assignment, and learner submission data to calculate each learner’s weighted average and individual assignment percentages according to the provided specification.
+
+Validates that the assignment group belongs to the course
+Groups submissions by learner
+Excludes assignments that are not yet due
+Applies a 10% late submission penalty
+Prevents division by zero and invalid data types
+Calculates weighted averages
+Rounds results to three decimal places
